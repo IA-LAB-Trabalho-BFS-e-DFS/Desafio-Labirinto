@@ -1,4 +1,4 @@
-from algoritmo import (
+from algoritmos import (
     generate_maze,
     bfs_grid,
     dfs_grid,
