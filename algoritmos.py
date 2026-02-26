@@ -30,15 +30,11 @@ def generate_maze(rows=20, cols=20, obstacle_prob=0.30):
 # FUNÇÕES AUXILIARES
 # ===============================
 
+
 def neighbors(pos: Tuple[int, int], grid) -> Iterable[Tuple[int, int]]:
     r, c = pos
 
-    directions = [
-        (-1, 0), (1, 0),
-        (0, -1), (0, 1),
-        (-1, -1), (-1, 1),
-        (1, -1), (1, 1)
-    ]
+    directions = [ (-1, 0), (1, 0), (0, -1), (0, 1),(-1, -1), (-1, 1),(1, -1), (1, 1)]
 
     for dr, dc in directions:
         nr, nc = r + dr, c + dc
@@ -65,6 +61,7 @@ def reconstruct_path(parent, start, goal):
 # ===============================
 # BFS
 # ===============================
+
 
 def bfs_grid(grid, start, goal):
     tracemalloc.start()
@@ -124,6 +121,22 @@ def dfs_grid(grid, start, goal):
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     return False, [], tempo, current, peak
+
+# ===============================
+# busca na dagonal
+# ===============================
+def busca_diagonal(grid, start, goal):
+    th= len(grid)
+    tv= len(grid[0])
+    print(f"Busca na diagonal:{th,tv}")
+    for i in grid :print(i)
+    for i in range(0, th):
+        vert=i
+        hori=i
+        if grid[hori][vert] == "#":
+            print(f"Obstáculo encontrado na diagonal principal em ({hori}, {vert})")
+        else:
+            print(f"Diagonal principal: posição ({i}, {i}), valor: '{grid[i][i]}'")
 
 
 # ===============================
