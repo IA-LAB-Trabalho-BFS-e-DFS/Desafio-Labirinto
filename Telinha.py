@@ -1,3 +1,5 @@
+from turtle import width
+
 import pygame
 import random
 from collections import deque
@@ -11,10 +13,9 @@ from time import time
 # ===============================
 
 CELL_SIZE = 30
-ROWS = 20
-COLS = 20
-WIDTH = COLS * CELL_SIZE
-HEIGHT = ROWS * CELL_SIZE
+rows = 20
+cols = 20
+
 FPS = 60
 search_start_time = time()
 SEARCH_DELAY = 120  # velocidade da busca (ms)
@@ -85,8 +86,8 @@ def reconstruct_path(parent, start, goal):
 # ===============================
 
 def draw_grid(screen, grid, visited, path):
-    for r in range(ROWS):
-        for c in range(COLS):
+    for r in range(rows):
+        for c in range(cols):
             rect = pygame.Rect(c*CELL_SIZE, r*CELL_SIZE, CELL_SIZE, CELL_SIZE)
 
             if (r, c) in path:
@@ -106,19 +107,84 @@ def draw_grid(screen, grid, visited, path):
             pygame.draw.rect(screen, GRAY, rect, 1)
 
 # ===============================
+# TELINHA DE CONFIGURAÇÃO
+# ===============================
+def pedir_dimensoes():
+    pygame.init()
+    tela = pygame.display.set_mode((400, 300))
+    pygame.display.set_caption("Configuração do Labirinto")
+    
+    # Configurações de Estilo
+    BRANCO, PRETO, AZUL, CINZA = (255, 255, 255), (0, 0, 0), (0, 200, 0), (100, 149, 237)
+    fonte = pygame.font.SysFont("Arial", 24)
+    relogio = pygame.time.Clock()
+
+    inputs = {"Largura": "20", "Altura": "20"}
+    campo_ativo = "Largura"
+    configurando = True
+
+    while configurando:
+        tela.fill(BRANCO)
+        
+        # Renderização de textos e caixas
+        img_titulo = fonte.render("Tamanho do Labirinto", True, PRETO)
+        tela.blit(img_titulo, (100, 30))
+
+        for i, (label, valor) in enumerate(inputs.items()):
+            y_pos = 100 + (i * 70)
+            cor = AZUL if campo_ativo == label else CINZA
+            
+            # Desenha Label e Caixa
+            txt_label = fonte.render(f"{label}:", True, PRETO)
+            tela.blit(txt_label, (50, y_pos + 5))
+            pygame.draw.rect(tela, cor, (160, y_pos, 100, 40), 2)
+            
+            # Desenha o número digitado
+            txt_valor = fonte.render(valor, True, PRETO)
+            tela.blit(txt_valor, (170, y_pos + 5))
+
+        txt_info = fonte.render("ENTER para iniciar", True, (100, 100, 100))
+        tela.blit(txt_info, (110, 250))
+
+        # Gerenciamento de Eventos
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+           
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN:
+                    # Retorna os valores como inteiros
+                    return int(inputs["Largura"]), int(inputs["Altura"])
+                
+                if evento.key == pygame.K_TAB:
+                    campo_ativo = "Altura" if campo_ativo == "Largura" else "Largura"
+                
+                if evento.key == pygame.K_BACKSPACE:
+                    inputs[campo_ativo] = inputs[campo_ativo][:-1]
+                
+                elif evento.unicode.isdigit() and len(inputs[campo_ativo]) < 3:
+                    inputs[campo_ativo] += evento.unicode
+
+        pygame.display.flip()
+        relogio.tick(30) # Limita a 30 FPS para economizar CPU
+
+# ===============================
 # MAIN
 # ===============================
 
 def main():
+    rows, cols = pedir_dimensoes()
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT + 60))
+    width = cols * CELL_SIZE
+    height = rows * CELL_SIZE
+    screen = pygame.display.set_mode((width, height + 60))
     pygame.display.set_caption("Busca em Tempo Real - Métricas")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 20)
 
-    grid = generate_maze(ROWS, COLS)
+    grid = generate_maze(rows, cols)
     start = (0, 0)
-    goal = (ROWS-1, COLS-1)
+    goal = (rows-1, cols-1)
 
     structure = None
     visited = set()
@@ -164,7 +230,11 @@ def main():
                     steps = 0
 
                 if event.key == pygame.K_r:
-                    grid = generate_maze(ROWS, COLS)
+                    width = cols * CELL_SIZE
+                    height = rows * CELL_SIZE
+                    screen = pygame.display.set_mode((width, height + 60))
+                    rows, cols = pedir_dimensoes()
+                    grid = generate_maze(rows, cols)
                     visited.clear()
                     parent.clear()
                     path = []
@@ -211,7 +281,7 @@ def main():
 
         info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {last_step_time/60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
         text_surface = font.render(info_text, True, (0, 0, 0))
-        screen.blit(text_surface, (10, HEIGHT + 15))
+        screen.blit(text_surface, (10, height + 15))
 
         pygame.display.update()
 
