@@ -10,7 +10,7 @@
 |------|----|
 | Sydhiney Silva | G75EJI5 |
 | Eduardo Theodoro | R153FJ3 |
-| Ariane Veras | 197123 |
+| Ariane Veras | R197123 |
 | Victor Donadi | G593IC1 |
 
 ---
@@ -87,6 +87,16 @@ Abra o terminal na pasta do projeto e execute:
 
 bash
 python main.py
+
+# COMANDOS
+
+B → iniciar BFS
+
+D → iniciar DFS
+
+R → gerar novo labirinto
+
+ESC → sair
 
 
 ---
