@@ -12,9 +12,9 @@ import pandas as pd
 # CONFIGURAÇÕES
 # ===============================
 
-CELL_SIZE = 30
-rows = 20
-cols = 20
+rows = 30
+cols = 30
+cell_size = 550//cols
 
 FPS = 60
 search_start_time = time()
@@ -85,10 +85,10 @@ def reconstruct_path(parent, start, goal):
 # DESENHO
 # ===============================
 
-def draw_grid(screen, grid, visited, path):
+def draw_grid(screen, grid, visited, path, cell_size):
     for r in range(rows):
         for c in range(cols):
-            rect = pygame.Rect(c*CELL_SIZE, r*CELL_SIZE, CELL_SIZE, CELL_SIZE)
+            rect = pygame.Rect(c*cell_size, r*cell_size, cell_size, cell_size)
 
             if (r, c) in path:
                 color = YELLOW
@@ -119,7 +119,7 @@ def pedir_dimensoes():
     fonte = pygame.font.SysFont("Arial", 24)
     relogio = pygame.time.Clock()
 
-    inputs = {"Largura": "20", "Altura": "20", "Obstáculos%": "30"}
+    inputs = {"Largura": "30", "Altura": "30", "Obstáculos%": "30"}
     campo_ativo = "Largura"
     configurando = True
 
@@ -181,8 +181,9 @@ def main():
     df = pd.DataFrame(columns=["Algoritmo", "Passos", "Visitados", "Tempo (s)", "Memória Atual (KB)", "Pico de Memória (KB)"])
     rows, cols,complexidade = pedir_dimensoes()
     pygame.init()
-    width = cols * CELL_SIZE
-    height = rows * CELL_SIZE
+    cell_size = 550 // cols
+    width = 600
+    height =550
     screen = pygame.display.set_mode((width+70, height + 70))
     pygame.display.set_caption("Busca em Tempo Real - Métricas")
     clock = pygame.time.Clock()
@@ -213,7 +214,7 @@ def main():
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_b:
+                if event.key == pygame.K_d:
                     tracemalloc.start()
                     structure = deque([start])
                     visited = {start}
@@ -224,7 +225,7 @@ def main():
                     mode = "BFS"
                     steps = 0
 
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_b:
                     tracemalloc.start()
                     structure = [start]
                     visited = {start}
@@ -236,11 +237,10 @@ def main():
                     steps = 0
 
                 if event.key == pygame.K_r:
-                    screen = pygame.display.set_mode((width+70, height + 70))
                     rows, cols,complexidade = pedir_dimensoes()
                     grid = generate_maze(rows, cols,complexidade)
-                    width = cols * CELL_SIZE
-                    height = rows * CELL_SIZE
+    
+                    screen = pygame.display.set_mode((width+70, height + 70))
                     visited.clear()
                     parent.clear()
                     path = []
@@ -283,10 +283,10 @@ def main():
 
         # DESENHO
         screen.fill(WHITE)
-        draw_grid(screen, grid, visited, path)
+        draw_grid(screen, grid, visited, path, cell_size)
         
         info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {last_step_time/60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
-        
+        df.loc[len(df)] = [mode, steps, visited, f"{last_step_time/60:.2f}", current_mem//1024, peak_mem//1024]    
         text_surface = font.render(info_text, True, (0, 0, 0))
         screen.blit(text_surface, (10, height + 15))
 
