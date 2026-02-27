@@ -6,7 +6,7 @@ from collections import deque
 from typing import Tuple, Iterable
 import tracemalloc
 from time import time
-
+import pandas as pd
 
 # ===============================
 # CONFIGURAÇÕES
@@ -111,7 +111,7 @@ def draw_grid(screen, grid, visited, path):
 # ===============================
 def pedir_dimensoes():
     pygame.init()
-    tela = pygame.display.set_mode((400, 300))
+    tela = pygame.display.set_mode((400, 400))
     pygame.display.set_caption("Configuração do Labirinto")
     
     # Configurações de Estilo
@@ -119,7 +119,7 @@ def pedir_dimensoes():
     fonte = pygame.font.SysFont("Arial", 24)
     relogio = pygame.time.Clock()
 
-    inputs = {"Largura": "20", "Altura": "20"}
+    inputs = {"Largura": "20", "Altura": "20", "Obstáculos%": "30"}
     campo_ativo = "Largura"
     configurando = True
 
@@ -136,15 +136,15 @@ def pedir_dimensoes():
             
             # Desenha Label e Caixa
             txt_label = fonte.render(f"{label}:", True, PRETO)
-            tela.blit(txt_label, (50, y_pos + 5))
+            tela.blit(txt_label, (5, y_pos + 5))
             pygame.draw.rect(tela, cor, (160, y_pos, 100, 40), 2)
             
             # Desenha o número digitado
             txt_valor = fonte.render(valor, True, PRETO)
-            tela.blit(txt_valor, (170, y_pos + 5))
+            tela.blit(txt_valor, (200, y_pos + 5))
 
         txt_info = fonte.render("ENTER para iniciar", True, (100, 100, 100))
-        tela.blit(txt_info, (110, 250))
+        tela.blit(txt_info, (110, 300))
 
         # Gerenciamento de Eventos
         for evento in pygame.event.get():
@@ -154,10 +154,15 @@ def pedir_dimensoes():
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_RETURN:
                     # Retorna os valores como inteiros
-                    return int(inputs["Largura"]), int(inputs["Altura"])
+                    return int(inputs["Largura"]), int(inputs["Altura"]), int(inputs["Obstáculos%"])/100
                 
                 if evento.key == pygame.K_TAB:
-                    campo_ativo = "Altura" if campo_ativo == "Largura" else "Largura"
+                    if campo_ativo == "Obstáculos%":
+                        campo_ativo = "Largura"
+                    elif campo_ativo == "Largura":
+                        campo_ativo = "Altura"
+                    elif campo_ativo == "Altura":
+                        campo_ativo = "Obstáculos%"
                 
                 if evento.key == pygame.K_BACKSPACE:
                     inputs[campo_ativo] = inputs[campo_ativo][:-1]
@@ -173,16 +178,17 @@ def pedir_dimensoes():
 # ===============================
 
 def main():
-    rows, cols = pedir_dimensoes()
+    df = pd.DataFrame(columns=["Algoritmo", "Passos", "Visitados", "Tempo (s)", "Memória Atual (KB)", "Pico de Memória (KB)"])
+    rows, cols,complexidade = pedir_dimensoes()
     pygame.init()
     width = cols * CELL_SIZE
     height = rows * CELL_SIZE
-    screen = pygame.display.set_mode((width, height + 60))
+    screen = pygame.display.set_mode((width+70, height + 70))
     pygame.display.set_caption("Busca em Tempo Real - Métricas")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 20)
 
-    grid = generate_maze(rows, cols)
+    grid = generate_maze(rows, cols,complexidade)
     start = (0, 0)
     goal = (rows-1, cols-1)
 
@@ -230,11 +236,11 @@ def main():
                     steps = 0
 
                 if event.key == pygame.K_r:
+                    screen = pygame.display.set_mode((width+70, height + 70))
+                    rows, cols,complexidade = pedir_dimensoes()
+                    grid = generate_maze(rows, cols,complexidade)
                     width = cols * CELL_SIZE
                     height = rows * CELL_SIZE
-                    screen = pygame.display.set_mode((width, height + 60))
-                    rows, cols = pedir_dimensoes()
-                    grid = generate_maze(rows, cols)
                     visited.clear()
                     parent.clear()
                     path = []
@@ -278,8 +284,9 @@ def main():
         # DESENHO
         screen.fill(WHITE)
         draw_grid(screen, grid, visited, path)
-
+        
         info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {last_step_time/60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
+        
         text_surface = font.render(info_text, True, (0, 0, 0))
         screen.blit(text_surface, (10, height + 15))
 
