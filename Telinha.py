@@ -14,7 +14,7 @@ import pandas as pd
 
 rows = 30
 cols = 30
-cell_size = 550//cols
+cell_size = 600//cols
 
 FPS = 60
 search_start_time = time()
@@ -181,9 +181,9 @@ def main():
     df = pd.DataFrame(columns=["Algoritmo", "Passos", "Visitados", "Tempo (s)", "Memória Atual (KB)", "Pico de Memória (KB)"])
     rows, cols,complexidade = pedir_dimensoes()
     pygame.init()
-    cell_size = 550 // cols
+    cell_size = 600 // cols
     width = 600
-    height =550
+    height =600
     screen = pygame.display.set_mode((width+70, height + 70))
     pygame.display.set_caption("Busca em Tempo Real - Métricas")
     clock = pygame.time.Clock()
@@ -214,7 +214,7 @@ def main():
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_b:
                     tracemalloc.start()
                     structure = deque([start])
                     visited = {start}
@@ -225,7 +225,7 @@ def main():
                     mode = "BFS"
                     steps = 0
 
-                if event.key == pygame.K_b:
+                if event.key == pygame.K_d:
                     tracemalloc.start()
                     structure = [start]
                     visited = {start}
@@ -288,6 +288,7 @@ def main():
         info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {last_step_time/60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
         df.loc[len(df)] = [mode, steps, visited, f"{last_step_time/60:.2f}", current_mem//1024, peak_mem//1024]    
         text_surface = font.render(info_text, True, (0, 0, 0))
+        
         screen.blit(text_surface, (10, height + 15))
 
         pygame.display.update()
@@ -296,4 +297,7 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
-    main()
+    try: 
+        main()
+    except Exception as e:
+        print(f"Erro ao executar o programa: {e}")
