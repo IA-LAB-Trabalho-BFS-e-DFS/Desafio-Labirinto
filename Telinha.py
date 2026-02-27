@@ -81,11 +81,20 @@ def reconstruct_path(parent, start, goal):
     path.reverse()
     return path
 
+def calcular_tamanho_dinamico(width, height,rows=rows, cols= cols):
+    # Calcula quanto cada célula poderia medir na horizontal e na vertical
+    tamanho_pela_largura = width // cols
+    tamanho_pela_altura = height // rows
+    
+    # O tamanho da célula será o menor dos dois (para não cortar a tela)
+    # E garantimos um tamanho mínimo de 2 pixels para não sumir
+    return max(2, min(tamanho_pela_largura, tamanho_pela_altura))
 # ===============================
 # DESENHO
 # ===============================
 
-def draw_grid(screen, grid, visited, path, cell_size):
+def draw_grid(screen, grid, visited, path, cell_size, width, height,rows=rows, cols=cols):
+    cell_size = calcular_tamanho_dinamico(width, height, rows, cols)
     for r in range(rows):
         for c in range(cols):
             rect = pygame.Rect(c*cell_size, r*cell_size, cell_size, cell_size)
@@ -187,7 +196,7 @@ def main():
     screen = pygame.display.set_mode((width+70, height + 70))
     pygame.display.set_caption("Busca em Tempo Real - Métricas")
     clock = pygame.time.Clock()
-    font = pygame.font.SysFont("Arial", 20)
+    font = pygame.font.SysFont("Arial", 18)
 
     grid = generate_maze(rows, cols,complexidade)
     start = (0, 0)
@@ -283,9 +292,9 @@ def main():
 
         # DESENHO
         screen.fill(WHITE)
-        draw_grid(screen, grid, visited, path, cell_size)
+        draw_grid(screen, grid, visited, path, cell_size,width, height,rows=rows, cols=cols)
         
-        info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {last_step_time/60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
+        info_text = f"Algoritmo: {mode} | Passos: {steps} | Visitados: {len(visited)}| Tempo: {(last_step_time//60)//60}:{last_step_time//60:.2f}s | Mem Atual: {current_mem//1024} KB | Pico: {peak_mem//1024} KB"
         df.loc[len(df)] = [mode, steps, visited, f"{last_step_time/60:.2f}", current_mem//1024, peak_mem//1024]    
         text_surface = font.render(info_text, True, (0, 0, 0))
         
